@@ -17,13 +17,13 @@ func main() {
 	rootCmd.PersistentFlags().StringP("formatter", "f", "", "formatter that should be used")
 
 	if err := rootCmd.Execute(); err != nil {
-		printInformation("could not execute command: %v", err)
+		printInformationf("could not execute command: %v", err)
 		os.Exit(1)
 	}
 
 	filePath, err := rootCmd.Flags().GetString("config")
 	if err != nil {
-		printInformation("could not fetch file option: %v", err)
+		printInformationf("could not fetch file option: %v", err)
 		os.Exit(1)
 	}
 	loadConfig(filePath)
@@ -34,7 +34,7 @@ func main() {
 	if isInputFromPipe() {
 		err := cmd.ProcessInput(os.Stdin, os.Stdout, formattingTemplate)
 		if err != nil {
-			printInformation("could not parse line: %v", err)
+			printInformationf("could not parse line: %v", err)
 			os.Exit(1)
 		}
 	}
@@ -42,28 +42,26 @@ func main() {
 
 func getFormatter(err error, formatter string) *template.Template {
 	if err != nil {
-		printInformation("could not fetch formatter option: %v", err)
+		printInformationf("could not fetch formatter option: %v", err)
 		os.Exit(1)
 	}
 	formatString := viper.GetString(formatter)
 	if formatString != "" {
 		parse, err := template.New(formatter).Parse(formatString)
 		if err != nil {
-			printInformation("could not parse template: %v", err)
+			printInformationf("could not parse template: %v", err)
 			os.Exit(1)
 		}
 		return parse
-	} else {
-		printInformation("no formatter with the name '%s' defined", formatter)
-		return nil
 	}
+	printInformationf("no formatter with the name '%s' defined", formatter)
 	return nil
 }
 
 func isInputFromPipe() bool {
 	stat, err := os.Stdin.Stat()
 	if err != nil {
-		printInformation("could not read stat")
+		printInformationf("could not read stat")
 		os.Exit(1)
 	}
 	return stat.Mode()&os.ModeCharDevice == 0
@@ -76,14 +74,14 @@ func loadConfig(filePath string) {
 	} else {
 		dir, err := os.UserConfigDir()
 		if err != nil {
-			printInformation("could not find base configuration directory")
+			printInformationf("could not find base configuration directory")
 		}
 		initializeConfiguration(filepath.Join(dir, "json2line"), "json2line.toml")
 	}
 }
 
 func initializeConfiguration(configDir string, configFile string) {
-	printInformation("Loading file '%s' in directory '%s'\n", configFile, configDir)
+	printInformationf("Loading file '%s' in directory '%s'\n", configFile, configDir)
 
 	viper.SetConfigName(configFile)
 	viper.SetConfigType("toml")
@@ -100,7 +98,7 @@ func initializeConfiguration(configDir string, configFile string) {
 	}
 }
 
-func printInformation(format string, a ...interface{}) {
+func printInformationf(format string, a ...interface{}) {
 	_, err := fmt.Fprintf(os.Stderr, format, a...)
 	if err != nil {
 		panic(fmt.Errorf("could not print to stderr: %v", err))

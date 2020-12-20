@@ -27,7 +27,7 @@ func processJSON(input string, t *template.Template) string {
 	var parsedJSON map[string]interface{}
 	err := json.Unmarshal([]byte(input), &parsedJSON)
 	if err != nil {
-		printInformation("could no parse line: %v", err)
+		printInformationf("could no parse line: %v", err)
 	}
 
 	if t == nil {
@@ -35,14 +35,13 @@ func processJSON(input string, t *template.Template) string {
 
 		appendValues(parsedJSON, &resultStrings)
 		return strings.Join(resultStrings, " ")
-	} else {
-		var buffer bytes.Buffer
-		err := t.Execute(&buffer, parsedJSON)
-		if err != nil {
-			printInformation("could no template line: %v", err)
-		}
-		return buffer.String()
 	}
+	var buffer bytes.Buffer
+	err = t.Execute(&buffer, parsedJSON)
+	if err != nil {
+		printInformationf("could no template line: %v", err)
+	}
+	return buffer.String()
 }
 
 func appendValues(parsedJSON map[string]interface{}, resultStrings *[]string) {
@@ -61,12 +60,12 @@ func appendValues(parsedJSON map[string]interface{}, resultStrings *[]string) {
 		case map[string]interface{}:
 			appendValues(e, resultStrings)
 		default:
-			printInformation("unknown type")
+			printInformationf("unknown type")
 		}
 	}
 }
 
-func printInformation(format string, a ...interface{}) {
+func printInformationf(format string, a ...interface{}) {
 	_, err := fmt.Fprintf(os.Stderr, format, a...)
 	if err != nil {
 		panic(fmt.Errorf("could not print to stderr: %v", err))
