@@ -2,17 +2,20 @@ package cmd
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"sort"
 	"strings"
+	"text/template"
 )
 
-func ProcessInput(r io.Reader, w io.Writer) error {
+func ProcessInput(r io.Reader, w io.Writer, t *template.Template) error {
 	scanner := bufio.NewScanner(bufio.NewReader(r))
 	for scanner.Scan() {
-		_, e := fmt.Fprintln(w, processJSON(scanner.Text()))
+		_, e := fmt.Fprintln(w, processJSON(scanner.Text(), t))
 		if e != nil {
 			return e
 		}
@@ -20,17 +23,26 @@ func ProcessInput(r io.Reader, w io.Writer) error {
 	return nil
 }
 
-func processJSON(input string) string {
+func processJSON(input string, t *template.Template) string {
 	var parsedJSON map[string]interface{}
 	err := json.Unmarshal([]byte(input), &parsedJSON)
 	if err != nil {
-		fmt.Printf("could no parse line: %v", err)
+		printInformation("could no parse line: %v", err)
 	}
 
-	var resultStrings []string
+	if t == nil {
+		var resultStrings []string
 
-	appendValues(parsedJSON, &resultStrings)
-	return strings.Join(resultStrings, " ")
+		appendValues(parsedJSON, &resultStrings)
+		return strings.Join(resultStrings, " ")
+	} else {
+		var buffer bytes.Buffer
+		err := t.Execute(&buffer, parsedJSON)
+		if err != nil {
+			printInformation("could no template line: %v", err)
+		}
+		return buffer.String()
+	}
 }
 
 func appendValues(parsedJSON map[string]interface{}, resultStrings *[]string) {
@@ -49,7 +61,14 @@ func appendValues(parsedJSON map[string]interface{}, resultStrings *[]string) {
 		case map[string]interface{}:
 			appendValues(e, resultStrings)
 		default:
-			fmt.Println("unknown type")
+			printInformation("unknown type")
 		}
+	}
+}
+
+func printInformation(format string, a ...interface{}) {
+	_, err := fmt.Fprintf(os.Stderr, format, a...)
+	if err != nil {
+		panic(fmt.Errorf("could not print to stderr: %v", err))
 	}
 }

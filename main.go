@@ -7,31 +7,57 @@ import (
 	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
+	"text/template"
 )
 
 func main() {
 	var rootCmd = &cobra.Command{Use: "json2line", Short: "json2line converts json to a formatted line of text"}
 
-	rootCmd.PersistentFlags().StringP("file", "f", "", "config file that should be used")
+	rootCmd.PersistentFlags().StringP("config", "c", "", "config file that should be used")
+	rootCmd.PersistentFlags().StringP("formatter", "f", "", "formatter that should be used")
+
 	if err := rootCmd.Execute(); err != nil {
 		printInformation("could not execute command: %v", err)
 		os.Exit(1)
 	}
 
-	filePath, err := rootCmd.Flags().GetString("file")
+	filePath, err := rootCmd.Flags().GetString("config")
 	if err != nil {
 		printInformation("could not fetch file option: %v", err)
 		os.Exit(1)
 	}
 	loadConfig(filePath)
 
+	formatter, err := rootCmd.Flags().GetString("formatter")
+	formattingTemplate := getFormatter(err, formatter)
+
 	if isInputFromPipe() {
-		err := cmd.ProcessInput(os.Stdin, os.Stdout)
+		err := cmd.ProcessInput(os.Stdin, os.Stdout, formattingTemplate)
 		if err != nil {
 			printInformation("could not parse line: %v", err)
 			os.Exit(1)
 		}
 	}
+}
+
+func getFormatter(err error, formatter string) *template.Template {
+	if err != nil {
+		printInformation("could not fetch formatter option: %v", err)
+		os.Exit(1)
+	}
+	formatString := viper.GetString(formatter)
+	if formatString != "" {
+		parse, err := template.New(formatter).Parse(formatString)
+		if err != nil {
+			printInformation("could not parse template: %v", err)
+			os.Exit(1)
+		}
+		return parse
+	} else {
+		printInformation("no formatter with the name '%s' defined", formatter)
+		return nil
+	}
+	return nil
 }
 
 func isInputFromPipe() bool {
