@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	var rootCmd = &cobra.Command{Use: "json2line", Short: "json2line converts json to a formatted line of text"}
+	var rootCmd = &cobra.Command{Use: "json2line"}
 
 	rootCmd.PersistentFlags().StringP("config", "c", "", "config file that should be used")
 	rootCmd.PersistentFlags().StringP("formatter", "f", "", "formatter that should be used")
@@ -23,7 +23,7 @@ func main() {
 
 	filePath, err := rootCmd.Flags().GetString("config")
 	if err != nil {
-		printInformationf("could not fetch file option: %v", err)
+		printInformationf("could not fetch file option: %v\n", err)
 		os.Exit(1)
 	}
 	loadConfig(filePath)
@@ -31,10 +31,12 @@ func main() {
 	formatter, err := rootCmd.Flags().GetString("formatter")
 	formattingTemplate := getFormatter(err, formatter)
 
+	replacements := viper.GetStringMapString("replacements")
+
 	if isInputFromPipe() {
-		err := cmd.ProcessInput(os.Stdin, os.Stdout, formattingTemplate)
+		err := cmd.ProcessInput(os.Stdin, os.Stdout, formattingTemplate, replacements)
 		if err != nil {
-			printInformationf("could not parse line: %v", err)
+			printInformationf("could not parse line: %v\n", err)
 			os.Exit(1)
 		}
 	}
@@ -42,26 +44,27 @@ func main() {
 
 func getFormatter(err error, formatter string) *template.Template {
 	if err != nil {
-		printInformationf("could not fetch formatter option: %v", err)
+		printInformationf("could not fetch formatter option: %v\n", err)
 		os.Exit(1)
 	}
-	formatString := viper.GetString(formatter)
+	templates := viper.GetStringMapString("templates")
+	formatString := templates[formatter]
 	if formatString != "" {
 		parse, err := template.New(formatter).Parse(formatString)
 		if err != nil {
-			printInformationf("could not parse template: %v", err)
+			printInformationf("could not parse template: %\n", err)
 			os.Exit(1)
 		}
 		return parse
 	}
-	printInformationf("no formatter with the name '%s' defined", formatter)
+	printInformationf("no formatter with the name '%s' defined\n", formatter)
 	return nil
 }
 
 func isInputFromPipe() bool {
 	stat, err := os.Stdin.Stat()
 	if err != nil {
-		printInformationf("could not read stat")
+		printInformationf("could not read stat\n")
 		os.Exit(1)
 	}
 	return stat.Mode()&os.ModeCharDevice == 0
@@ -74,7 +77,7 @@ func loadConfig(filePath string) {
 	} else {
 		dir, err := os.UserConfigDir()
 		if err != nil {
-			printInformationf("could not find base configuration directory")
+			printInformationf("could not find base configuration directory\n")
 		}
 		initializeConfiguration(filepath.Join(dir, "json2line"), "json2line.toml")
 	}
@@ -91,7 +94,7 @@ func initializeConfiguration(configDir string, configFile string) {
 	err := viper.ReadInConfig()
 	switch t := err.(type) {
 	case viper.ConfigFileNotFoundError:
-		fmt.Println("No config file found, using defaults")
+		printInformationf("No config file found, using defaults\n")
 	case nil:
 	default:
 		panic(fmt.Errorf("fatal error: (%v) %s", t, err))
