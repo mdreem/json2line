@@ -12,10 +12,10 @@ import (
 	"text/template"
 )
 
-func ProcessInput(r io.Reader, w io.Writer, t *template.Template) error {
+func ProcessInput(r io.Reader, w io.Writer, t *template.Template, replacements map[string]string) error {
 	scanner := bufio.NewScanner(bufio.NewReader(r))
 	for scanner.Scan() {
-		_, e := fmt.Fprintln(w, processJSON(scanner.Text(), t))
+		_, e := fmt.Fprintln(w, processJSON(scanner.Text(), t, replacements))
 		if e != nil {
 			return e
 		}
@@ -23,13 +23,13 @@ func ProcessInput(r io.Reader, w io.Writer, t *template.Template) error {
 	return nil
 }
 
-func processJSON(input string, t *template.Template) string {
+func processJSON(input string, t *template.Template, replacements map[string]string) string {
 	var parsedJSON map[string]interface{}
 	err := json.Unmarshal([]byte(input), &parsedJSON)
 	if err != nil {
 		printInformationf("could no parse line: %v", err)
 	}
-	replaceKeys(&parsedJSON)
+	replaceKeys(&parsedJSON, replacements)
 
 	if t == nil {
 		var resultStrings []string
@@ -45,16 +45,19 @@ func processJSON(input string, t *template.Template) string {
 	return buffer.String()
 }
 
-func replaceKeys(data *map[string]interface{}) {
+func replaceKeys(data *map[string]interface{}, replacements map[string]string) {
 	for k, v := range *data {
 		delete(*data, k)
 
 		mapValue, ok := v.(map[string]interface{})
 		if ok {
-			replaceKeys(&mapValue)
+			replaceKeys(&mapValue, replacements)
 		}
 
-		keyWithReplacedCharacters := strings.ReplaceAll(k, "@", "at_")
+		var keyWithReplacedCharacters = k
+		for term, replacement := range replacements {
+			keyWithReplacedCharacters = strings.ReplaceAll(keyWithReplacedCharacters, term, replacement)
+		}
 		(*data)[keyWithReplacedCharacters] = v
 	}
 }

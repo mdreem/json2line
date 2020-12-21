@@ -31,8 +31,10 @@ func main() {
 	formatter, err := rootCmd.Flags().GetString("formatter")
 	formattingTemplate := getFormatter(err, formatter)
 
+	replacements := viper.GetStringMapString("replacements")
+
 	if isInputFromPipe() {
-		err := cmd.ProcessInput(os.Stdin, os.Stdout, formattingTemplate)
+		err := cmd.ProcessInput(os.Stdin, os.Stdout, formattingTemplate, replacements)
 		if err != nil {
 			printInformationf("could not parse line: %v\n", err)
 			os.Exit(1)
