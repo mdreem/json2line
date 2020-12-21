@@ -45,7 +45,8 @@ func getFormatter(err error, formatter string) *template.Template {
 		printInformationf("could not fetch formatter option: %v\n", err)
 		os.Exit(1)
 	}
-	formatString := viper.GetString(formatter)
+	templates := viper.GetStringMapString("templates")
+	formatString := templates[formatter]
 	if formatString != "" {
 		parse, err := template.New(formatter).Parse(formatString)
 		if err != nil {
