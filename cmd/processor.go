@@ -29,6 +29,7 @@ func processJSON(input string, t *template.Template) string {
 	if err != nil {
 		printInformationf("could no parse line: %v", err)
 	}
+	replaceKeys(&parsedJSON)
 
 	if t == nil {
 		var resultStrings []string
@@ -42,6 +43,13 @@ func processJSON(input string, t *template.Template) string {
 		printInformationf("could no template line: %v", err)
 	}
 	return buffer.String()
+}
+
+func replaceKeys(data *map[string]interface{}) {
+	for k, v := range *data {
+		delete(*data, k)
+		(*data)[k] = v
+	}
 }
 
 func appendValues(parsedJSON map[string]interface{}, resultStrings *[]string) {
