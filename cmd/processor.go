@@ -48,7 +48,14 @@ func processJSON(input string, t *template.Template) string {
 func replaceKeys(data *map[string]interface{}) {
 	for k, v := range *data {
 		delete(*data, k)
-		(*data)[k] = v
+
+		mapValue, ok := v.(map[string]interface{})
+		if ok {
+			replaceKeys(&mapValue)
+		}
+
+		keyWithReplacedCharacters := strings.ReplaceAll(k, "@", "at_")
+		(*data)[keyWithReplacedCharacters] = v
 	}
 }
 
