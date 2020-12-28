@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	var rootCmd = &cobra.Command{Use: "json2line"}
+	var rootCmd = &cobra.Command{Use: "json2line", Run: func(c *cobra.Command, args []string) {}}
 
 	rootCmd.PersistentFlags().StringP("config", "c", "", "config file that should be used")
 	rootCmd.PersistentFlags().StringP("formatter", "f", "", "formatter that should be used")
