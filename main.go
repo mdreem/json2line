@@ -15,23 +15,25 @@ func main() {
 
 	rootCmd.PersistentFlags().StringP("config", "c", "", "config file that should be used")
 	rootCmd.PersistentFlags().StringP("formatter", "f", "", "formatter that should be used")
+	rootCmd.PersistentFlags().StringP("adhoc", "a", "", "ad hoc format string.")
 
 	if err := rootCmd.Execute(); err != nil {
 		printInformationf("could not execute command: %v", err)
 		os.Exit(1)
 	}
 
-	filePath, err := rootCmd.Flags().GetString("config")
-	if err != nil {
-		printInformationf("could not fetch file option: %v\n", err)
-		os.Exit(1)
+	initConfig(rootCmd)
+
+	adHocFormatString := getString(rootCmd, "adhoc")
+
+	var formattingTemplate *template.Template
+	if adHocFormatString == "" {
+		formattingTemplate = loadTemplate(rootCmd)
+	} else {
+		formattingTemplate = createTemplate("adhoc", adHocFormatString)
 	}
-	loadConfig(filePath)
 
-	formatter, err := rootCmd.Flags().GetString("formatter")
-	formattingTemplate := getFormatter(err, formatter)
-
-	replacements := viper.GetStringMapString("replacements")
+	replacements := loadReplacements()
 
 	if isInputFromPipe() {
 		err := cmd.ProcessInput(os.Stdin, os.Stdout, formattingTemplate, replacements)
@@ -42,6 +44,25 @@ func main() {
 	}
 }
 
+func getString(rootCmd *cobra.Command, option string) string {
+	optionString, err := rootCmd.Flags().GetString(option)
+	if err != nil {
+		printInformationf("could not fetch %s option: %v\n", option, err)
+		os.Exit(1)
+	}
+	return optionString
+}
+
+func loadTemplate(rootCmd *cobra.Command) *template.Template {
+	formatter, err := rootCmd.Flags().GetString("formatter")
+	formattingTemplate := getFormatter(err, formatter)
+	return formattingTemplate
+}
+
+func loadReplacements() map[string]string {
+	return viper.GetStringMapString("replacements")
+}
+
 func getFormatter(err error, formatter string) *template.Template {
 	if err != nil {
 		printInformationf("could not fetch formatter option: %v\n", err)
@@ -50,15 +71,19 @@ func getFormatter(err error, formatter string) *template.Template {
 	templates := viper.GetStringMapString("templates")
 	formatString := templates[formatter]
 	if formatString != "" {
-		parse, err := template.New(formatter).Parse(formatString)
-		if err != nil {
-			printInformationf("could not parse template: %\n", err)
-			os.Exit(1)
-		}
-		return parse
+		return createTemplate(formatter, formatString)
 	}
 	printInformationf("no formatter with the name '%s' defined\n", formatter)
 	return nil
+}
+
+func createTemplate(formatter string, formatString string) *template.Template {
+	parse, err := template.New(formatter).Parse(formatString)
+	if err != nil {
+		printInformationf("could not parse template: %\n", err)
+		os.Exit(1)
+	}
+	return parse
 }
 
 func isInputFromPipe() bool {
@@ -68,6 +93,11 @@ func isInputFromPipe() bool {
 		os.Exit(1)
 	}
 	return stat.Mode()&os.ModeCharDevice == 0
+}
+
+func initConfig(rootCmd *cobra.Command) {
+	filePath := getString(rootCmd, "config")
+	loadConfig(filePath)
 }
 
 func loadConfig(filePath string) {
