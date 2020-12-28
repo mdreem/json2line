@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 )
 
@@ -16,6 +17,7 @@ func main() {
 	rootCmd.PersistentFlags().StringP("config", "c", "", "config file that should be used")
 	rootCmd.PersistentFlags().StringP("formatter", "f", "", "formatter that should be used")
 	rootCmd.PersistentFlags().StringP("adhoc", "a", "", "ad hoc format string.")
+	rootCmd.PersistentFlags().StringArrayP("replacement", "r", []string{}, "ad hoc replacements.")
 
 	if err := rootCmd.Execute(); err != nil {
 		printInformationf("could not execute command: %v", err)
@@ -33,7 +35,7 @@ func main() {
 		formattingTemplate = createTemplate("adhoc", adHocFormatString)
 	}
 
-	replacements := loadReplacements()
+	replacements := loadReplacements(rootCmd)
 
 	if isInputFromPipe() {
 		err := cmd.ProcessInput(os.Stdin, os.Stdout, formattingTemplate, replacements)
@@ -59,8 +61,28 @@ func loadTemplate(rootCmd *cobra.Command) *template.Template {
 	return formattingTemplate
 }
 
-func loadReplacements() map[string]string {
-	return viper.GetStringMapString("replacements")
+func loadReplacements(rootCmd *cobra.Command) map[string]string {
+	configuredReplacements := viper.GetStringMapString("replacements")
+	adhocReplacements, err := rootCmd.Flags().GetStringArray("replacement")
+	if err != nil {
+		printInformationf("could not fetch replacement options: %v\n", err)
+		os.Exit(1)
+	}
+
+	var replacements = make(map[string]string)
+	for k, v := range configuredReplacements {
+		replacements[k] = v
+	}
+
+	for _, r := range adhocReplacements {
+		replacement := strings.Fields(r)
+		if len(replacement) != 2 {
+			printInformationf("replacement is not of correct format '<FROM> <TO>' where both values are separated via whitespace")
+		}
+
+		replacements[replacement[0]] = replacement[1]
+	}
+	return replacements
 }
 
 func getFormatter(err error, formatter string) *template.Template {
