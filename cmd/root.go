@@ -40,6 +40,15 @@ func getString(rootCmd *cobra.Command, option string) string {
 	return optionString
 }
 
+func getBoolean(rootCmd *cobra.Command, option string) bool {
+	optionString, err := rootCmd.Flags().GetBool(option)
+	if err != nil {
+		printInformationf("could not fetch %s option: %v\n", option, err)
+		os.Exit(1)
+	}
+	return optionString
+}
+
 func initConfiguration() {
 	filePath := getString(RootCmd, "config")
 	loadConfig(filePath)
@@ -77,7 +86,7 @@ func initializeConfiguration(configDir string, configFile string) {
 }
 
 func runCommand(c *cobra.Command, args []string) {
-	fmt.Printf("args: %v", args)
+	fmt.Printf("root-args: %v", args)
 
 	adHocFormatString := getString(c, "adhoc")
 

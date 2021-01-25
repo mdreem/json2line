@@ -3,14 +3,29 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-var configCmd = &cobra.Command{Use: "configure", Run: func(c *cobra.Command, args []string) {
-	configuration(c, args)
-}, TraverseChildren: true}
+var configCmd = &cobra.Command{
+	Use: "configure",
+	Run: func(c *cobra.Command, args []string) {
+		configuration(c, args)
+	},
+}
 
 func configuration(c *cobra.Command, args []string) {
-	fmt.Printf("args: %v", args)
+	show := getBoolean(c, "show")
+
+	if show {
+		fmt.Printf("Templates:\n")
+		for key, value := range viper.GetStringMapString("templates") {
+			fmt.Printf("'%v' -> '%v'\n", key, value)
+		}
+		fmt.Printf("\nReplacements:\n")
+		for key, value := range viper.GetStringMapString("replacements") {
+			fmt.Printf("'%v' -> '%v'\n", key, value)
+		}
+	}
 }
 
 func init() {

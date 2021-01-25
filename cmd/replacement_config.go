@@ -6,7 +6,8 @@ import (
 )
 
 var replacementConfigCmd = &cobra.Command{
-	Use: "replacement", Run: func(c *cobra.Command, args []string) {
+	Use: "replacement",
+	Run: func(c *cobra.Command, args []string) {
 		replacementConfiguration(c, args)
 	},
 }
