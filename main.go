@@ -12,30 +12,20 @@ import (
 )
 
 func main() {
-	var rootCmd = &cobra.Command{Use: "json2line", Run: func(c *cobra.Command, args []string) {}}
+	cmd.Execute()
 
-	rootCmd.PersistentFlags().StringP("config", "c", "", "config file that should be used")
-	rootCmd.PersistentFlags().StringP("formatter", "f", "", "formatter that should be used")
-	rootCmd.PersistentFlags().StringP("adhoc", "a", "", "ad hoc format string.")
-	rootCmd.PersistentFlags().StringArrayP("replacement", "r", []string{}, "ad hoc replacements.")
+	initConfig(cmd.RootCmd)
 
-	if err := rootCmd.Execute(); err != nil {
-		printInformationf("could not execute command: %v", err)
-		os.Exit(1)
-	}
-
-	initConfig(rootCmd)
-
-	adHocFormatString := getString(rootCmd, "adhoc")
+	adHocFormatString := getString(cmd.RootCmd, "adhoc")
 
 	var formattingTemplate *template.Template
 	if adHocFormatString == "" {
-		formattingTemplate = loadTemplate(rootCmd)
+		formattingTemplate = loadTemplate(cmd.RootCmd)
 	} else {
 		formattingTemplate = createTemplate("adhoc", adHocFormatString)
 	}
 
-	replacements := loadReplacements(rootCmd)
+	replacements := loadReplacements(cmd.RootCmd)
 
 	if isInputFromPipe() {
 		err := cmd.ProcessInput(os.Stdin, os.Stdout, formattingTemplate, replacements)
