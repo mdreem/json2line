@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 	"sort"
 	"strings"
 	"text/template"
@@ -80,12 +79,5 @@ func appendValues(parsedJSON map[string]interface{}, resultStrings *[]string) {
 		default:
 			printInformationf("unknown type")
 		}
-	}
-}
-
-func printInformationf(format string, a ...interface{}) {
-	_, err := fmt.Fprintf(os.Stderr, format, a...)
-	if err != nil {
-		panic(fmt.Errorf("could not print to stderr: %v", err))
 	}
 }
