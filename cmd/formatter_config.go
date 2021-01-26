@@ -13,7 +13,7 @@ var formatterConfigCmd = &cobra.Command{
 	},
 }
 
-func formatterConfiguration(c *cobra.Command, args []string) {
+func formatterConfiguration(c *cobra.Command, _ []string) {
 	replacementSection := viper.GetStringMapString("templates")
 
 	reconfigureSection(c, &replacementSection)

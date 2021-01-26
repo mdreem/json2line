@@ -15,7 +15,7 @@ var configCmd = &cobra.Command{
 	},
 }
 
-func configuration(c *cobra.Command, args []string) {
+func configuration(c *cobra.Command, _ []string) {
 	show := getBoolean(c, "show")
 
 	if show {

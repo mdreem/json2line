@@ -13,7 +13,7 @@ var replacementConfigCmd = &cobra.Command{
 	},
 }
 
-func replacementConfiguration(c *cobra.Command, args []string) {
+func replacementConfiguration(c *cobra.Command, _ []string) {
 	replacementSection := viper.GetStringMapString("replacements")
 
 	reconfigureSection(c, &replacementSection)
