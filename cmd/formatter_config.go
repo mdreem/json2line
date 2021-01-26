@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"os"
 )
 
 var formatterConfigCmd = &cobra.Command{
@@ -13,7 +14,13 @@ var formatterConfigCmd = &cobra.Command{
 }
 
 func formatterConfiguration(c *cobra.Command, args []string) {
-	fmt.Printf("args: %v", args)
+	printInformationf("writing configuration to: %s\n", viper.ConfigFileUsed())
+
+	err := viper.WriteConfig()
+	if err != nil {
+		printInformationf("could not write config: %v\n", err)
+		os.Exit(1)
+	}
 }
 
 func init() {
