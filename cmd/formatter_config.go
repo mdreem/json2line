@@ -14,6 +14,12 @@ var formatterConfigCmd = &cobra.Command{
 }
 
 func formatterConfiguration(c *cobra.Command, args []string) {
+	replacementSection := viper.GetStringMapString("templates")
+
+	reconfigureSection(c, &replacementSection)
+
+	viper.Set("templates", replacementSection)
+
 	printInformationf("writing configuration to: %s\n", viper.ConfigFileUsed())
 
 	err := viper.WriteConfig()
@@ -24,6 +30,8 @@ func formatterConfiguration(c *cobra.Command, args []string) {
 }
 
 func init() {
-	formatterConfigCmd.PersistentFlags().StringArrayP("add", "a", []string{}, "add formatter configuration. <NAME> <PATTERN>")
+	formatterConfigCmd.PersistentFlags().StringP("add-key", "k", "", "key to add.")
+	formatterConfigCmd.PersistentFlags().StringP("add-value", "v", "", "value to add.")
+
 	formatterConfigCmd.PersistentFlags().StringP("delete", "d", "", "delete formatter configuration. <NAME>")
 }

@@ -14,6 +14,12 @@ var replacementConfigCmd = &cobra.Command{
 }
 
 func replacementConfiguration(c *cobra.Command, args []string) {
+	replacementSection := viper.GetStringMapString("replacements")
+
+	reconfigureSection(c, &replacementSection)
+
+	viper.Set("replacements", replacementSection)
+
 	printInformationf("writing configuration to: %s\n", viper.ConfigFileUsed())
 
 	err := viper.WriteConfig()
@@ -24,6 +30,8 @@ func replacementConfiguration(c *cobra.Command, args []string) {
 }
 
 func init() {
-	replacementConfigCmd.PersistentFlags().StringArrayP("add", "a", []string{}, "add replacement configuration. <NAME> <PATTERN>")
+	replacementConfigCmd.PersistentFlags().StringP("add-key", "k", "", "key to add.")
+	replacementConfigCmd.PersistentFlags().StringP("add-value", "v", "", "value to add.")
+
 	replacementConfigCmd.PersistentFlags().StringP("delete", "d", "", "delete replacement configuration. <NAME>")
 }
