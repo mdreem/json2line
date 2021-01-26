@@ -108,6 +108,14 @@ func TestProcessInputWithTemplate(t *testing.T) {
 			wantW:   "->line1<--><no value><-[<no value>-<no value>]\n->line2<--><no value><-[<no value>-<no value>]\n",
 			wantErr: false,
 		},
+		{
+			name: "invalid JSON",
+			args: args{
+				r: strings.NewReader("NOT_A_JSON"),
+			},
+			wantW:   "NOT_A_JSON\n",
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

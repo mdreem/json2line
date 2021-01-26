@@ -26,7 +26,7 @@ func processJSON(input string, t *template.Template, replacements map[string]str
 	var parsedJSON map[string]interface{}
 	err := json.Unmarshal([]byte(input), &parsedJSON)
 	if err != nil {
-		printInformationf("could no parse line: %v", err)
+		return input
 	}
 	replaceKeys(&parsedJSON, replacements)
 
@@ -39,7 +39,7 @@ func processJSON(input string, t *template.Template, replacements map[string]str
 	var buffer bytes.Buffer
 	err = t.Execute(&buffer, parsedJSON)
 	if err != nil {
-		printInformationf("could no template line: %v", err)
+		printInformationf("could not parse template line: %v", err)
 	}
 	return buffer.String()
 }
