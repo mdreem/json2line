@@ -37,3 +37,27 @@ my_template = "the value is:'{{ .at_key }}'"
 Now all occurrences of `@` will be replaced with `at_`. Now, if `@key` appears in the JSON, it will
 be renamed to `at_key` internally so that it can be accessed via `{{ .at_key }}` as shown in the
 `templates`-section.
+
+## Configuration
+
+The configuration can be adapted via the command line interface
+
+This can be achieved by the subcommand `json2line configure` which has two subcommands `formatter` and `replacement`
+which can be used to change the available formatters and replacements, respectively.
+
+### Changing the formatter configuration
+
+```bash
+# add a new formatter with the name 'new_formatter'
+json2line configure formatter -k "new_formatter" -v "{{ .someTemplate }}"
+
+# delete a formatter with the name 'new_formatter'
+json2line configure formatter -d "new_formatter"                          
+```
+
+Be careful, as this is immediately persisted.
+
+It is also possible to print the current configuration:
+```bash
+json2line configure -s
+```
