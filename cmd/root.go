@@ -10,6 +10,9 @@ import (
 	"text/template"
 )
 
+var GitCommit string
+var Version string
+
 var RootCmd = &cobra.Command{
 	Use: "json2line",
 	Run: runCommand,
@@ -29,6 +32,7 @@ func init() {
 	RootCmd.PersistentFlags().StringP("formatter", "f", "", "formatter that should be used. <NAME>")
 	RootCmd.PersistentFlags().StringP("adhoc", "o", "", "ad hoc format string.")
 	RootCmd.PersistentFlags().StringArrayP("replacement", "r", []string{}, "ad hoc replacements.")
+	RootCmd.PersistentFlags().BoolP("version", "V", false, "print version information.")
 }
 
 func getString(rootCmd *cobra.Command, option string) string {
@@ -85,8 +89,10 @@ func initializeConfiguration(configDir string, configFile string) {
 	}
 }
 
-func runCommand(c *cobra.Command, args []string) {
-	fmt.Printf("root-args: %v", args)
+func runCommand(c *cobra.Command, _ []string) {
+	if handleVersionFlag(c) {
+		return
+	}
 
 	adHocFormatString := getString(c, "adhoc")
 
@@ -106,6 +112,16 @@ func runCommand(c *cobra.Command, args []string) {
 			os.Exit(1)
 		}
 	}
+}
+
+func handleVersionFlag(c *cobra.Command) bool {
+	printVersion := getBoolean(c, "version")
+	if printVersion {
+		fmt.Printf("\nVersion: %s\n", Version)
+		fmt.Printf("Commit:  %s\n", GitCommit)
+		return true
+	}
+	return false
 }
 
 func loadTemplate(rootCmd *cobra.Command) *template.Template {
