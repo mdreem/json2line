@@ -33,7 +33,7 @@ func configuration(c *cobra.Command, _ []string) {
 func init() {
 	RootCmd.AddCommand(configCmd)
 	configCmd.PersistentFlags().BoolP("show", "s", false, "show current configuration")
-	configCmd.AddCommand(formatterConfigCmd, replacementConfigCmd)
+	configCmd.AddCommand(formatterConfigCmd, replacementConfigCmd, initConfigurationFileCmd)
 }
 
 func reconfigureSection(c *cobra.Command, section *map[string]string) {

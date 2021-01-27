@@ -66,6 +66,7 @@ func loadConfig(filePath string) {
 		dir, err := os.UserConfigDir()
 		if err != nil {
 			printInformationf("could not find base configuration directory\n")
+			os.Exit(1)
 		}
 		initializeConfiguration(filepath.Join(dir, "json2line"), "json2line.toml")
 	}
