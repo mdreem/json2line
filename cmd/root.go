@@ -6,6 +6,7 @@ import (
 	"github.com/mdreem/json2line/configuration/load"
 	"github.com/mdreem/json2line/processor"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"os"
 	"strconv"
 	"text/template"
@@ -68,9 +69,18 @@ func runCommand(command *cobra.Command, _ []string) {
 
 func getBufferSize(command *cobra.Command) int {
 	bufferSizeString := common.GetString(command, "buffer-size")
-	if bufferSizeString == "" {
+	if bufferSizeString != "" {
+		return convertBufferSizeToInt(bufferSizeString)
+	}
+	configurationSection := viper.GetStringMapString("configuration")
+	bufferSizeString, ok := configurationSection["buffer_size"]
+	if !ok {
 		return processor.InitialBufferSize
 	}
+	return convertBufferSizeToInt(bufferSizeString)
+}
+
+func convertBufferSizeToInt(bufferSizeString string) int {
 	bufferSize, err := strconv.Atoi(bufferSizeString)
 	if err != nil {
 		common.PrintInformationf("could not parse buffer size: %v\n", err)
