@@ -93,8 +93,22 @@ func handleVersionFlag(c *cobra.Command) bool {
 
 func loadTemplate(rootCmd *cobra.Command) *template.Template {
 	formatter, err := rootCmd.Flags().GetString("formatter")
-	formattingTemplate := getFormatter(err, formatter)
+	if err != nil {
+		common.PrintInformationf("could not fetch formatter option: %v\n", err)
+		os.Exit(1)
+	}
+	formattingTemplate := getFormatter(formatter)
 	return formattingTemplate
+}
+
+func getFormatter(formatter string) *template.Template {
+	templates := viper.GetStringMapString("templates")
+	formatString := templates[formatter]
+	if formatString != "" {
+		return createTemplate(formatter, formatString)
+	}
+	common.PrintInformationf("no formatter with the name '%s' defined\n", formatter)
+	return nil
 }
 
 func loadReplacements(rootCmd *cobra.Command) map[string]string {
@@ -119,20 +133,6 @@ func loadReplacements(rootCmd *cobra.Command) map[string]string {
 		replacements[replacement[0]] = replacement[1]
 	}
 	return replacements
-}
-
-func getFormatter(err error, formatter string) *template.Template {
-	if err != nil {
-		common.PrintInformationf("could not fetch formatter option: %v\n", err)
-		os.Exit(1)
-	}
-	templates := viper.GetStringMapString("templates")
-	formatString := templates[formatter]
-	if formatString != "" {
-		return createTemplate(formatter, formatString)
-	}
-	common.PrintInformationf("no formatter with the name '%s' defined\n", formatter)
-	return nil
 }
 
 func createTemplate(formatter string, formatString string) *template.Template {
