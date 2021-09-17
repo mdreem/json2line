@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/mdreem/json2line/common"
 	"io"
 	"sort"
 	"strings"
@@ -39,7 +40,7 @@ func processJSON(input string, t *template.Template, replacements map[string]str
 	var buffer bytes.Buffer
 	err = t.Execute(&buffer, parsedJSON)
 	if err != nil {
-		printInformationf("could not parse template line: %v", err)
+		common.PrintInformationf("could not parse template line: %v", err)
 	}
 	return buffer.String()
 }
@@ -77,7 +78,7 @@ func appendValues(parsedJSON map[string]interface{}, resultStrings *[]string) {
 		case map[string]interface{}:
 			appendValues(e, resultStrings)
 		default:
-			printInformationf("unknown type")
+			common.PrintInformationf("unknown type")
 		}
 	}
 }

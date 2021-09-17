@@ -1,6 +1,7 @@
-package cmd
+package configuration
 
 import (
+	"github.com/mdreem/json2line/common"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -20,11 +21,11 @@ func replacementConfiguration(c *cobra.Command, _ []string) {
 
 	viper.Set("replacements", replacementSection)
 
-	printInformationf("writing configuration to: %s\n", viper.ConfigFileUsed())
+	common.PrintInformationf("writing configuration to: %s\n", viper.ConfigFileUsed())
 
 	err := viper.WriteConfig()
 	if err != nil {
-		printInformationf("could not write config: %v\n", err)
+		common.PrintInformationf("could not write config: %v\n", err)
 		os.Exit(1)
 	}
 }

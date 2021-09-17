@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/mdreem/json2line/common"
+	"github.com/mdreem/json2line/configuration/load"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -19,13 +21,15 @@ var RootCmd = &cobra.Command{
 
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
-		printInformationf("could not execute command: %v", err)
+		common.PrintInformationf("could not execute command: %v", err)
 		os.Exit(1)
 	}
 }
 
 func init() {
-	cobra.OnInitialize(initConfiguration)
+	cobra.OnInitialize(func() {
+		load.LoadConfig(common.GetString(RootCmd, "config"))
+	})
 
 	RootCmd.PersistentFlags().StringP("config", "c", "", "config file that should be used. <FILE>")
 	RootCmd.PersistentFlags().StringP("formatter", "f", "", "formatter that should be used. <NAME>")
@@ -34,30 +38,12 @@ func init() {
 	RootCmd.PersistentFlags().BoolP("version", "V", false, "print version information.")
 }
 
-func getString(rootCmd *cobra.Command, option string) string {
-	optionString, err := rootCmd.Flags().GetString(option)
-	if err != nil {
-		printInformationf("could not fetch %s option: %v\n", option, err)
-		os.Exit(1)
-	}
-	return optionString
-}
-
-func getBoolean(rootCmd *cobra.Command, option string) bool {
-	optionString, err := rootCmd.Flags().GetBool(option)
-	if err != nil {
-		printInformationf("could not fetch %s option: %v\n", option, err)
-		os.Exit(1)
-	}
-	return optionString
-}
-
 func runCommand(c *cobra.Command, _ []string) {
 	if handleVersionFlag(c) {
 		return
 	}
 
-	adHocFormatString := getString(c, "adhoc")
+	adHocFormatString := common.GetString(c, "adhoc")
 
 	var formattingTemplate *template.Template
 	if adHocFormatString == "" {
@@ -71,14 +57,14 @@ func runCommand(c *cobra.Command, _ []string) {
 	if isInputFromPipe() {
 		err := ProcessInput(os.Stdin, os.Stdout, formattingTemplate, replacements)
 		if err != nil {
-			printInformationf("could not parse line: %v\n", err)
+			common.PrintInformationf("could not parse line: %v\n", err)
 			os.Exit(1)
 		}
 	}
 }
 
 func handleVersionFlag(c *cobra.Command) bool {
-	printVersion := getBoolean(c, "version")
+	printVersion := common.GetBoolean(c, "version")
 	if printVersion {
 		fmt.Printf("\nVersion: %s\n", Version)
 		fmt.Printf("Commit:  %s\n", GitCommit)
@@ -97,7 +83,7 @@ func loadReplacements(rootCmd *cobra.Command) map[string]string {
 	configuredReplacements := viper.GetStringMapString("replacements")
 	adhocReplacements, err := rootCmd.Flags().GetStringArray("replacement")
 	if err != nil {
-		printInformationf("could not fetch replacement options: %v\n", err)
+		common.PrintInformationf("could not fetch replacement options: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -109,7 +95,7 @@ func loadReplacements(rootCmd *cobra.Command) map[string]string {
 	for _, r := range adhocReplacements {
 		replacement := strings.Fields(r)
 		if len(replacement) != 2 {
-			printInformationf("replacement is not of correct format '<FROM> <TO>' where both values are separated via whitespace")
+			common.PrintInformationf("replacement is not of correct format '<FROM> <TO>' where both values are separated via whitespace")
 		}
 
 		replacements[replacement[0]] = replacement[1]
@@ -119,7 +105,7 @@ func loadReplacements(rootCmd *cobra.Command) map[string]string {
 
 func getFormatter(err error, formatter string) *template.Template {
 	if err != nil {
-		printInformationf("could not fetch formatter option: %v\n", err)
+		common.PrintInformationf("could not fetch formatter option: %v\n", err)
 		os.Exit(1)
 	}
 	templates := viper.GetStringMapString("templates")
@@ -127,14 +113,14 @@ func getFormatter(err error, formatter string) *template.Template {
 	if formatString != "" {
 		return createTemplate(formatter, formatString)
 	}
-	printInformationf("no formatter with the name '%s' defined\n", formatter)
+	common.PrintInformationf("no formatter with the name '%s' defined\n", formatter)
 	return nil
 }
 
 func createTemplate(formatter string, formatString string) *template.Template {
 	parse, err := template.New(formatter).Parse(formatString)
 	if err != nil {
-		printInformationf("could not parse template: %\n", err)
+		common.PrintInformationf("could not parse template: %\n", err)
 		os.Exit(1)
 	}
 	return parse
@@ -143,15 +129,8 @@ func createTemplate(formatter string, formatString string) *template.Template {
 func isInputFromPipe() bool {
 	stat, err := os.Stdin.Stat()
 	if err != nil {
-		printInformationf("could not read stat\n")
+		common.PrintInformationf("could not read stat\n")
 		os.Exit(1)
 	}
 	return stat.Mode()&os.ModeCharDevice == 0
-}
-
-func printInformationf(format string, a ...interface{}) {
-	_, err := fmt.Fprintf(os.Stderr, format, a...)
-	if err != nil {
-		panic(fmt.Errorf("could not print to stderr: %v", err))
-	}
 }
