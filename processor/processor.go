@@ -1,23 +1,31 @@
-package cmd
+package processor
 
 import (
 	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/mdreem/json2line/common"
 	"io"
 	"sort"
 	"strings"
 	"text/template"
 )
 
-func ProcessInput(r io.Reader, w io.Writer, t *template.Template, replacements map[string]string) error {
-	scanner := bufio.NewScanner(bufio.NewReader(r))
+const InitialBufferSize = 4096
+
+func ProcessInput(reader io.Reader, writer io.Writer, t *template.Template, replacements map[string]string, bufferSize int) error {
+	scanner := bufio.NewScanner(bufio.NewReader(reader))
+	scanner.Buffer(make([]byte, 0, InitialBufferSize), bufferSize)
+
 	for scanner.Scan() {
-		_, e := fmt.Fprintln(w, processJSON(scanner.Text(), t, replacements))
+		_, e := fmt.Fprintln(writer, processJSON(scanner.Text(), t, replacements))
 		if e != nil {
 			return e
 		}
+	}
+	if scanner.Err() != nil {
+		return scanner.Err()
 	}
 	return nil
 }
@@ -39,7 +47,7 @@ func processJSON(input string, t *template.Template, replacements map[string]str
 	var buffer bytes.Buffer
 	err = t.Execute(&buffer, parsedJSON)
 	if err != nil {
-		printInformationf("could not parse template line: %v", err)
+		common.PrintInformationf("could not parse template line: %v", err)
 	}
 	return buffer.String()
 }
@@ -77,7 +85,7 @@ func appendValues(parsedJSON map[string]interface{}, resultStrings *[]string) {
 		case map[string]interface{}:
 			appendValues(e, resultStrings)
 		default:
-			printInformationf("unknown type")
+			common.PrintInformationf("unknown type")
 		}
 	}
 }

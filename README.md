@@ -61,3 +61,22 @@ It is also possible to print the current configuration:
 ```bash
 json2line configure -s
 ```
+
+## Buffer Size
+
+Sometimes a line may be too large and the error message
+```
+could not parse line: bufio.Scanner: token too long
+```
+appears. 
+For such cases it is possible to set the buffer size to a larger value in the configuration via:
+```bash
+json2line configure buffer_size -S <BUFFER_SIZE>
+```
+
+In case this should not be persisted it is possible to just call
+```bash
+json2line -b <BUFFER_SIZE>
+```
+in this case nothing gets persisted and the value in the configuration file gets ignored in
+favor of this value.
