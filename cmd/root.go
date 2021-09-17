@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/mdreem/json2line/common"
 	"github.com/mdreem/json2line/configuration/load"
+	"github.com/mdreem/json2line/processor"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -55,7 +56,7 @@ func runCommand(c *cobra.Command, _ []string) {
 	replacements := loadReplacements(c)
 
 	if isInputFromPipe() {
-		err := ProcessInput(os.Stdin, os.Stdout, formattingTemplate, replacements)
+		err := processor.ProcessInput(os.Stdin, os.Stdout, formattingTemplate, replacements)
 		if err != nil {
 			common.PrintInformationf("could not parse line: %v\n", err)
 			os.Exit(1)
