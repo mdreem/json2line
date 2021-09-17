@@ -2,7 +2,6 @@ package configuration
 
 import (
 	"fmt"
-	"github.com/mdreem/json2line/cmd"
 	"github.com/mdreem/json2line/common"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -10,14 +9,7 @@ import (
 	"strings"
 )
 
-var configCmd = &cobra.Command{
-	Use: "configure",
-	Run: func(c *cobra.Command, args []string) {
-		configuration(c, args)
-	},
-}
-
-func configuration(c *cobra.Command, _ []string) {
+func Configuration(c *cobra.Command, _ []string) {
 	show := common.GetBoolean(c, "show")
 
 	if show {
@@ -30,12 +22,6 @@ func configuration(c *cobra.Command, _ []string) {
 			fmt.Printf("'%v' -> '%v'\n", key, value)
 		}
 	}
-}
-
-func init() {
-	cmd.RootCmd.AddCommand(configCmd)
-	configCmd.PersistentFlags().BoolP("show", "s", false, "show current configuration")
-	configCmd.AddCommand(formatterConfigCmd, replacementConfigCmd, initConfigurationFileCmd)
 }
 
 func reconfigureSection(c *cobra.Command, section *map[string]string) {

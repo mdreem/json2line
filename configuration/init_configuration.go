@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-var initConfigurationFileCmd = &cobra.Command{
+var InitConfigurationFileCmd = &cobra.Command{
 	Use: "init",
 	Run: func(c *cobra.Command, args []string) {
 		initConfigurationFile(c, args)

@@ -7,11 +7,18 @@ import (
 	"os"
 )
 
-var replacementConfigCmd = &cobra.Command{
+var ReplacementConfigCmd = &cobra.Command{
 	Use: "replacement",
 	Run: func(c *cobra.Command, args []string) {
 		replacementConfiguration(c, args)
 	},
+}
+
+func init() {
+	ReplacementConfigCmd.PersistentFlags().StringP("add-key", "k", "", "key to add.")
+	ReplacementConfigCmd.PersistentFlags().StringP("add-value", "v", "", "value to add.")
+
+	ReplacementConfigCmd.PersistentFlags().StringP("delete", "d", "", "delete replacement configuration. <NAME>")
 }
 
 func replacementConfiguration(c *cobra.Command, _ []string) {
@@ -28,11 +35,4 @@ func replacementConfiguration(c *cobra.Command, _ []string) {
 		common.PrintInformationf("could not write config: %v\n", err)
 		os.Exit(1)
 	}
-}
-
-func init() {
-	replacementConfigCmd.PersistentFlags().StringP("add-key", "k", "", "key to add.")
-	replacementConfigCmd.PersistentFlags().StringP("add-value", "v", "", "value to add.")
-
-	replacementConfigCmd.PersistentFlags().StringP("delete", "d", "", "delete replacement configuration. <NAME>")
 }
