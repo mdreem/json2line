@@ -21,10 +21,14 @@ func Configuration(c *cobra.Command, _ []string) {
 		for key, value := range viper.GetStringMapString("replacements") {
 			fmt.Printf("'%v' -> '%v'\n", key, value)
 		}
+		fmt.Printf("\nConfiguration:\n")
+		for key, value := range viper.GetStringMapString("configuration") {
+			fmt.Printf("'%v' -> '%v'\n", key, value)
+		}
 	}
 }
 
-func reconfigureSection(c *cobra.Command, section *map[string]string) {
+func reconfigureSectionViaCommand(c *cobra.Command, section *map[string]string) {
 	addKey := strings.ToLower(common.GetString(c, "add-key"))
 	addValue := common.GetString(c, "add-value")
 

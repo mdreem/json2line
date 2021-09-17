@@ -24,7 +24,7 @@ func init() {
 func FormatterConfiguration(c *cobra.Command, _ []string) {
 	replacementSection := viper.GetStringMapString("templates")
 
-	reconfigureSection(c, &replacementSection)
+	reconfigureSectionViaCommand(c, &replacementSection)
 
 	viper.Set("templates", replacementSection)
 

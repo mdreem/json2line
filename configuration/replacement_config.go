@@ -24,7 +24,7 @@ func init() {
 func replacementConfiguration(c *cobra.Command, _ []string) {
 	replacementSection := viper.GetStringMapString("replacements")
 
-	reconfigureSection(c, &replacementSection)
+	reconfigureSectionViaCommand(c, &replacementSection)
 
 	viper.Set("replacements", replacementSection)
 

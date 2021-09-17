@@ -15,5 +15,10 @@ var configCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(configCmd)
 	configCmd.PersistentFlags().BoolP("show", "s", false, "show current configuration")
-	configCmd.AddCommand(configuration.FormatterConfigCmd, configuration.ReplacementConfigCmd, configuration.InitConfigurationFileCmd)
+	configCmd.AddCommand(
+		configuration.FormatterConfigCmd,
+		configuration.ReplacementConfigCmd,
+		configuration.InitConfigurationFileCmd,
+		configuration.BufferSizeConfigCmd,
+	)
 }
