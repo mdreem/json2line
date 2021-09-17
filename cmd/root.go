@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
+	"strconv"
 	"strings"
 	"text/template"
 )
@@ -35,33 +36,49 @@ func init() {
 	RootCmd.PersistentFlags().StringP("config", "c", "", "config file that should be used. <FILE>")
 	RootCmd.PersistentFlags().StringP("formatter", "f", "", "formatter that should be used. <NAME>")
 	RootCmd.PersistentFlags().StringP("adhoc", "o", "", "ad hoc format string.")
+	RootCmd.PersistentFlags().StringP("buffer-size", "b", "", "set buffer size for lines.")
 	RootCmd.PersistentFlags().StringArrayP("replacement", "r", []string{}, "ad hoc replacements.")
 	RootCmd.PersistentFlags().BoolP("version", "V", false, "print version information.")
 }
 
-func runCommand(c *cobra.Command, _ []string) {
-	if handleVersionFlag(c) {
+func runCommand(command *cobra.Command, _ []string) {
+	if handleVersionFlag(command) {
 		return
 	}
 
-	adHocFormatString := common.GetString(c, "adhoc")
+	adHocFormatString := common.GetString(command, "adhoc")
 
 	var formattingTemplate *template.Template
 	if adHocFormatString == "" {
-		formattingTemplate = loadTemplate(c)
+		formattingTemplate = loadTemplate(command)
 	} else {
 		formattingTemplate = createTemplate("adhoc", adHocFormatString)
 	}
 
-	replacements := loadReplacements(c)
+	replacements := loadReplacements(command)
+
+	bufferSize := getBufferSize(command)
 
 	if isInputFromPipe() {
-		err := processor.ProcessInput(os.Stdin, os.Stdout, formattingTemplate, replacements)
+		err := processor.ProcessInput(os.Stdin, os.Stdout, formattingTemplate, replacements, bufferSize)
 		if err != nil {
 			common.PrintInformationf("could not parse line: %v\n", err)
 			os.Exit(1)
 		}
 	}
+}
+
+func getBufferSize(command *cobra.Command) int {
+	bufferSizeString := common.GetString(command, "buffer-size")
+	if bufferSizeString == "" {
+		return processor.InitialBufferSize
+	}
+	bufferSize, err := strconv.Atoi(bufferSizeString)
+	if err != nil {
+		common.PrintInformationf("could not parse buffer size: %v\n", err)
+		os.Exit(1)
+	}
+	return bufferSize
 }
 
 func handleVersionFlag(c *cobra.Command) bool {

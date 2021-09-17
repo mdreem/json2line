@@ -12,10 +12,14 @@ import (
 	"text/template"
 )
 
-func ProcessInput(r io.Reader, w io.Writer, t *template.Template, replacements map[string]string) error {
-	scanner := bufio.NewScanner(bufio.NewReader(r))
+const InitialBufferSize = 4096
+
+func ProcessInput(reader io.Reader, writer io.Writer, t *template.Template, replacements map[string]string, bufferSize int) error {
+	scanner := bufio.NewScanner(bufio.NewReader(reader))
+	scanner.Buffer(make([]byte, 0, InitialBufferSize), bufferSize)
+
 	for scanner.Scan() {
-		_, e := fmt.Fprintln(w, processJSON(scanner.Text(), t, replacements))
+		_, e := fmt.Fprintln(writer, processJSON(scanner.Text(), t, replacements))
 		if e != nil {
 			return e
 		}
