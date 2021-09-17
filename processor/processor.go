@@ -20,6 +20,9 @@ func ProcessInput(r io.Reader, w io.Writer, t *template.Template, replacements m
 			return e
 		}
 	}
+	if scanner.Err() != nil {
+		return scanner.Err()
+	}
 	return nil
 }
 
