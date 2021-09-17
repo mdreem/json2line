@@ -29,7 +29,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(func() {
-		load.LoadConfig(common.GetString(RootCmd, "config"))
+		load.Config(common.GetString(RootCmd, "config"))
 	})
 
 	RootCmd.PersistentFlags().StringP("config", "c", "", "config file that should be used. <FILE>")

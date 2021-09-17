@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-func LoadConfig(filePath string) {
+func Config(filePath string) {
 	if filePath != "" {
 		directory, file := filepath.Split(filePath)
 		initializeConfiguration(directory, file)
