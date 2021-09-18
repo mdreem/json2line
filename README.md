@@ -1,4 +1,5 @@
 [![codecov](https://codecov.io/gh/mdreem/json2line/branch/master/graph/badge.svg?token=YXHFEIB3YM)](https://codecov.io/gh/mdreem/json2line)
+[![Go](https://github.com/mdreem/json2line/actions/workflows/go.yml/badge.svg)](https://github.com/mdreem/json2line/actions/workflows/go.yml)
 
 # json2line
 
