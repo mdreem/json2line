@@ -16,7 +16,7 @@ const InitialBufferSize = 4096
 
 func ProcessInput(reader io.Reader, writer io.Writer, t *template.Template, replacements map[string]string, bufferSize int) error {
 	scanner := bufio.NewScanner(bufio.NewReader(reader))
-	scanner.Buffer(make([]byte, 0, InitialBufferSize), bufferSize)
+	scanner.Buffer(make([]byte, 0, bufferSize), bufferSize)
 
 	for scanner.Scan() {
 		_, e := fmt.Fprintln(writer, processJSON(scanner.Text(), t, replacements))

@@ -2,24 +2,13 @@ package cmd
 
 import (
 	"github.com/mdreem/json2line/common"
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
 	"strings"
 	"text/template"
 )
 
-func loadTemplate(rootCmd *cobra.Command) *template.Template {
-	formatter, err := rootCmd.Flags().GetString("formatter")
-	if err != nil {
-		common.PrintInformationf("could not fetch formatter option: %v\n", err)
-		os.Exit(1)
-	}
-	formattingTemplate := getFormatter(formatter)
-	return formattingTemplate
-}
-
-func getFormatter(formatter string) *template.Template {
+func loadTemplate(formatter string) *template.Template {
 	templates := viper.GetStringMapString("templates")
 	formatString := templates[formatter]
 	if formatString != "" {
@@ -29,13 +18,8 @@ func getFormatter(formatter string) *template.Template {
 	return nil
 }
 
-func loadReplacements(rootCmd *cobra.Command) map[string]string {
+func loadReplacements(adhocReplacements []string) map[string]string {
 	configuredReplacements := viper.GetStringMapString("replacements")
-	adhocReplacements, err := rootCmd.Flags().GetStringArray("replacement")
-	if err != nil {
-		common.PrintInformationf("could not fetch replacement options: %v\n", err)
-		os.Exit(1)
-	}
 
 	var replacements = make(map[string]string)
 	for k, v := range configuredReplacements {

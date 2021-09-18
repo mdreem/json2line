@@ -20,6 +20,8 @@ var RootCmd = &cobra.Command{
 	Run: runCommand,
 }
 
+var exitCmd = os.Exit
+
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
 		common.PrintInformationf("could not execute command: %v", err)
@@ -49,12 +51,12 @@ func runCommand(command *cobra.Command, _ []string) {
 
 	var formattingTemplate *template.Template
 	if adHocFormatString == "" {
-		formattingTemplate = loadTemplate(command)
+		formattingTemplate = loadTemplate(common.GetString(command, "formatter"))
 	} else {
 		formattingTemplate = createTemplate("adhoc", adHocFormatString)
 	}
 
-	replacements := loadReplacements(command)
+	replacements := loadReplacements(common.GetStringArray(command, "replacement"))
 
 	bufferSize := getBufferSize(command)
 
@@ -62,7 +64,7 @@ func runCommand(command *cobra.Command, _ []string) {
 		err := processor.ProcessInput(os.Stdin, os.Stdout, formattingTemplate, replacements, bufferSize)
 		if err != nil {
 			common.PrintInformationf("could not parse line: %v\n", err)
-			os.Exit(1)
+			exitCmd(1)
 		}
 	}
 }

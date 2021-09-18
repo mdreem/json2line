@@ -15,6 +15,15 @@ func GetString(rootCmd *cobra.Command, option string) string {
 	return optionString
 }
 
+func GetStringArray(rootCmd *cobra.Command, option string) []string {
+	optionStringArray, err := rootCmd.Flags().GetStringArray(option)
+	if err != nil {
+		PrintInformationf("could not fetch %s option: %v\n", option, err)
+		os.Exit(1)
+	}
+	return optionStringArray
+}
+
 func GetBoolean(rootCmd *cobra.Command, option string) bool {
 	optionString, err := rootCmd.Flags().GetBool(option)
 	if err != nil {

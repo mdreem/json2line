@@ -14,8 +14,10 @@ var InitConfigurationFileCmd = &cobra.Command{
 	},
 }
 
+var UserConfigDir = os.UserConfigDir
+
 func initConfigurationFile(_ *cobra.Command, _ []string) {
-	dir, err := os.UserConfigDir()
+	dir, err := UserConfigDir()
 	if err != nil {
 		common.PrintInformationf("could not find base configuration directory: %v\n", err)
 		os.Exit(1)
@@ -29,9 +31,14 @@ func initConfigurationFile(_ *cobra.Command, _ []string) {
 	}
 
 	configFile := filepath.Join(configDir, "json2line.toml")
-	_, err = os.OpenFile(configFile, os.O_RDONLY|os.O_CREATE, 0666)
+	file, err := os.OpenFile(configFile, os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
 		common.PrintInformationf("could not create configuration file (%s) %v\n", configFile, err)
+		os.Exit(1)
+	}
+	err = file.Close()
+	if err != nil {
+		common.PrintInformationf("unable to close created configuration file (%s) %v\n", configFile, err)
 		os.Exit(1)
 	}
 
