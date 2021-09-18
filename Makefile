@@ -8,7 +8,7 @@ run:
 	go run main.go
 
 test:
-	go test -v ./... -covermode=count -coverprofile=coverage.out
+	go test -v ./... -covermode=count -coverprofile=coverage.out -coverpkg ./...
 
 lint:
 	golangci-lint run --config=.github/linters/golangci.yml
