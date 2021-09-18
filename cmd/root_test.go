@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/mdreem/json2line/configuration"
 	"github.com/mdreem/json2line/configuration/load"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -14,21 +16,28 @@ func TestCommand(t *testing.T) {
 		args    []string
 		input   string
 		wantW   string
-		wantErr bool
+		wantErr string
 	}{
 		{
 			name:    "simple input",
 			args:    []string{""},
 			input:   "{ \"message\": \"Praise the Sun\" }",
 			wantW:   "Praise the Sun\n",
-			wantErr: false,
+			wantErr: "",
 		},
 		{
 			name:    "check empty configuration",
 			args:    []string{"configure", "-s"},
 			input:   "",
 			wantW:   "Templates:\n\nReplacements:\n\nConfiguration:\n",
-			wantErr: false,
+			wantErr: "",
+		},
+		{
+			name:    "check buffer_size command",
+			args:    []string{"-b", "5"},
+			input:   "{ \"message\": \"Praise the Sun\" }",
+			wantW:   "exited with code 1\n",
+			wantErr: "could not parse line: bufio.Scanner: token too long\n",
 		},
 	}
 	for _, tt := range tests {
@@ -38,45 +47,63 @@ func TestCommand(t *testing.T) {
 			tempDir := t.TempDir()
 			initRealUserConfigDirFunc := configuration.UserConfigDir
 			loadRealUserConfigDirFunc := load.UserConfigDir
+			realExit := exitCmd
 
 			mockUserConfigDirFunc := func() (string, error) {
 				return tempDir, nil
 			}
 			configuration.UserConfigDir = mockUserConfigDirFunc
 			load.UserConfigDir = mockUserConfigDirFunc
+			exitCmd = func(code int) {
+				fmt.Printf("exited with code %d\n", code)
+			}
 
 			defer func() {
 				configuration.UserConfigDir = initRealUserConfigDirFunc
 				load.UserConfigDir = loadRealUserConfigDirFunc
+				exitCmd = realExit
 			}()
 
-			gotW := executeCommandWithInput(t, tt.input)
+			gotW, gotErr := executeCommandWithInput(t, tt.input)
 
 			if gotW != tt.wantW {
 				t.Errorf("executeCommandWithInput gotW = '%v', want '%v'", gotW, tt.wantW)
+			}
+
+			if tt.wantErr != "" && !strings.HasSuffix(gotErr, tt.wantErr) {
+				t.Errorf("executeCommandWithInput gotErr = '%v', want it to end with '%v'", gotErr, tt.wantErr)
 			}
 		})
 	}
 }
 
-func executeCommandWithInput(t *testing.T, input string) string {
+func executeCommandWithInput(t *testing.T, input string) (string, string) {
 	inputBytes := []byte(input)
 	r := prepareStdIn(t, inputBytes)
-	readStdOut, w := prepareStdOut(t)
+	readStdOut, wStdout := prepareStdOut(t)
+	readStdErr, wStderr := prepareStdOut(t)
+
 	stdin := os.Stdin
 	stdout := os.Stdout
+	stderr := os.Stderr
 	defer func() {
 		os.Stdin = stdin
 		os.Stdout = stdout
+		os.Stderr = stderr
 	}()
 	os.Stdin = r
-	os.Stdout = w
+	os.Stdout = wStdout
+	os.Stderr = wStderr
 
 	err := RootCmd.Execute()
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = w.Close()
+	err = wStdout.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = wStderr.Close()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +112,11 @@ func executeCommandWithInput(t *testing.T, input string) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return string(output)
+	outputErr, err := ioutil.ReadAll(readStdErr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(output), string(outputErr)
 }
 
 func prepareStdIn(t *testing.T, input []byte) *os.File {

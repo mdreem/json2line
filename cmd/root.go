@@ -20,6 +20,8 @@ var RootCmd = &cobra.Command{
 	Run: runCommand,
 }
 
+var exitCmd = os.Exit
+
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
 		common.PrintInformationf("could not execute command: %v", err)
@@ -62,7 +64,7 @@ func runCommand(command *cobra.Command, _ []string) {
 		err := processor.ProcessInput(os.Stdin, os.Stdout, formattingTemplate, replacements, bufferSize)
 		if err != nil {
 			common.PrintInformationf("could not parse line: %v\n", err)
-			os.Exit(1)
+			exitCmd(1)
 		}
 	}
 }
