@@ -14,8 +14,10 @@ var InitConfigurationFileCmd = &cobra.Command{
 	},
 }
 
+var UserConfigDir = os.UserConfigDir
+
 func initConfigurationFile(_ *cobra.Command, _ []string) {
-	dir, err := os.UserConfigDir()
+	dir, err := UserConfigDir()
 	if err != nil {
 		common.PrintInformationf("could not find base configuration directory: %v\n", err)
 		os.Exit(1)

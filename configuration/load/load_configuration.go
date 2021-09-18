@@ -8,12 +8,14 @@ import (
 	"path/filepath"
 )
 
+var UserConfigDir = os.UserConfigDir
+
 func Config(filePath string) {
 	if filePath != "" {
 		directory, file := filepath.Split(filePath)
 		initializeConfiguration(directory, file)
 	} else {
-		dir, err := os.UserConfigDir()
+		dir, err := UserConfigDir()
 		if err != nil {
 			common.PrintInformationf("could not find base configuration directory\n")
 			os.Exit(1)

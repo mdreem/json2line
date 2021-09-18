@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"github.com/mdreem/json2line/configuration"
+	"github.com/mdreem/json2line/configuration/load"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -21,11 +23,32 @@ func TestCommand(t *testing.T) {
 			wantW:   "Praise the Sun\n",
 			wantErr: false,
 		},
+		{
+			name:    "check empty configuration",
+			args:    []string{"configure", "-s"},
+			input:   "",
+			wantW:   "Templates:\n\nReplacements:\n\nConfiguration:\n",
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			args := []string{""}
-			RootCmd.SetArgs(args)
+			RootCmd.SetArgs(tt.args)
+
+			tempDir := t.TempDir()
+			initRealUserConfigDirFunc := configuration.UserConfigDir
+			loadRealUserConfigDirFunc := load.UserConfigDir
+
+			mockUserConfigDirFunc := func() (string, error) {
+				return tempDir, nil
+			}
+			configuration.UserConfigDir = mockUserConfigDirFunc
+			load.UserConfigDir = mockUserConfigDirFunc
+
+			defer func() {
+				configuration.UserConfigDir = initRealUserConfigDirFunc
+				load.UserConfigDir = loadRealUserConfigDirFunc
+			}()
 
 			gotW := executeCommandWithInput(t, tt.input)
 
