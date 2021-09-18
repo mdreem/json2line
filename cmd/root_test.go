@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/mdreem/json2line/configuration"
 	"github.com/mdreem/json2line/configuration/load"
+	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -42,6 +43,7 @@ func TestCommand(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			defer func() { viper.Reset() }()
 			RootCmd.SetArgs(tt.args)
 
 			tempDir := t.TempDir()

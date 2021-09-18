@@ -5,11 +5,13 @@ import (
 	"github.com/mdreem/json2line/configuration"
 	"github.com/mdreem/json2line/configuration/load"
 	"github.com/pelletier/go-toml"
+	"github.com/spf13/viper"
 	"path/filepath"
 	"testing"
 )
 
 func TestConfigureCommandBufferSize(t *testing.T) {
+	defer func() { viper.Reset() }()
 	const bufferSize = "1000"
 
 	tempDir := t.TempDir()
@@ -53,6 +55,7 @@ func TestConfigureCommandBufferSize(t *testing.T) {
 }
 
 func TestConfigureCommandFormatter(t *testing.T) {
+	defer func() { viper.Reset() }()
 	const formatterKey = "some_key"
 	const formatterValue = "some_value"
 
@@ -97,6 +100,7 @@ func TestConfigureCommandFormatter(t *testing.T) {
 }
 
 func TestConfigureCommandReplacement(t *testing.T) {
+	defer func() { viper.Reset() }()
 	const replacementKey = "some_key"
 	const replacementValue = "some_value"
 
