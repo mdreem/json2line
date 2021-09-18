@@ -42,7 +42,7 @@ func TestCommand(t *testing.T) {
 		},
 		{
 			name:    "test ad-hoc templates",
-			args:    []string{"-o", "MY_TEMPLATE {{ .message }}."},
+			args:    []string{"-o", "MY_TEMPLATE {{ .message }}.", "-b", "4096"},
 			input:   "{ \"message\": \"Praise the Sun\" }",
 			wantW:   "MY_TEMPLATE Praise the Sun.\n",
 			wantErr: "",
