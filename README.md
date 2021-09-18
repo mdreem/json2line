@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/mdreem/json2line/branch/master/graph/badge.svg?token=YXHFEIB3YM)](https://codecov.io/gh/mdreem/json2line)
+
 # json2line
 
 `json2line` is a tool that takes JSON strings in lines and formats its values to a string.
