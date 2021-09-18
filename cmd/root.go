@@ -49,12 +49,12 @@ func runCommand(command *cobra.Command, _ []string) {
 
 	var formattingTemplate *template.Template
 	if adHocFormatString == "" {
-		formattingTemplate = loadTemplate(command)
+		formattingTemplate = loadTemplate(common.GetString(command, "formatter"))
 	} else {
 		formattingTemplate = createTemplate("adhoc", adHocFormatString)
 	}
 
-	replacements := loadReplacements(command)
+	replacements := loadReplacements(common.GetStringArray(command, "replacement"))
 
 	bufferSize := getBufferSize(command)
 
