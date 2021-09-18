@@ -47,6 +47,13 @@ func TestCommand(t *testing.T) {
 			wantW:   "MY_TEMPLATE Praise the Sun.\n",
 			wantErr: "",
 		},
+		{
+			name:    "test ad-hoc replacements",
+			args:    []string{"-o", "MY_TEMPLATE {{ .at_message }}.", "-r", "@ at_", "-b", "4096"},
+			input:   "{ \"@message\": \"Praise the Sun\" }",
+			wantW:   "MY_TEMPLATE Praise the Sun.\n",
+			wantErr: "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
