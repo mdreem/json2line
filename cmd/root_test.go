@@ -5,7 +5,7 @@ import (
 	"github.com/mdreem/json2line/configuration"
 	"github.com/mdreem/json2line/configuration/load"
 	"github.com/spf13/viper"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 	"testing"
@@ -124,11 +124,11 @@ func executeCommandWithInput(t *testing.T, input string) (string, string) {
 		t.Fatal(err)
 	}
 
-	output, err := ioutil.ReadAll(readStdOut)
+	output, err := io.ReadAll(readStdOut)
 	if err != nil {
 		t.Fatal(err)
 	}
-	outputErr, err := ioutil.ReadAll(readStdErr)
+	outputErr, err := io.ReadAll(readStdErr)
 	if err != nil {
 		t.Fatal(err)
 	}
