@@ -37,9 +37,9 @@ jobs:
       run: make test
 
     - name: Run golangci-lint
-      uses: golangci/golangci-lint-action@v2
+      uses: golangci/golangci-lint-action@v3
       with:
-        version: v1.29
+        version: latest
         args: --config=.github/linters/golangci.yml
 
     - name: Codecov
