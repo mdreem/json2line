@@ -1,8 +1,8 @@
 # Changelog
 
-## 0.11.0
+## 0.12.0
 
 ### Changed
 
 - Upgraded various dependencies.
-- 
+- Increase default buffer size.
