@@ -12,7 +12,7 @@ import (
 	"text/template"
 )
 
-const InitialBufferSize = 4096
+const InitialBufferSize = 1048576
 
 func ProcessInput(reader io.Reader, writer io.Writer, t *template.Template, replacements map[string]string, bufferSize int) error {
 	scanner := bufio.NewScanner(bufio.NewReader(reader))
